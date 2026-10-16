@@ -1186,7 +1186,7 @@ export default function SignupPage() {
                             />
                           </div>
 
-                          <div>
+                          {/* <div>
                             <label className={labelClass}>Relationship to Minor *</label>
                             <select
                               className={inputClass}
@@ -1200,7 +1200,7 @@ export default function SignupPage() {
                               <option>Legal Guardian</option>
                               <option>Other</option>
                             </select>
-                          </div>
+                          </div> */}
 
                           <div>
                             <label className={labelClass}>Guardian PAN Number *</label>
