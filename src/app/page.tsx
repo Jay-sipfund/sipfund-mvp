@@ -136,7 +136,69 @@ export default function SignupPage() {
     "h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100";
 
   const labelClass = "mb-1.5 block text-xs font-semibold text-slate-700";
+  const [nominees, setNominees] = useState<Nominee[]>([
+    createNominee(1),
+  ]);
+  const [nextNomineeId, setNextNomineeId] = useState(2);
 
+  const nomineeTotal = nominees.reduce(
+    (total, nominee) => total + (Number(nominee.percentage) || 0),
+    0
+  );
+
+  function updateNominee(
+    id: number,
+    field: keyof Nominee,
+    value: string
+  ) {
+    setNominees((current) =>
+      current.map((nominee) =>
+        nominee.id === id ? { ...nominee, [field]: value } : nominee
+      )
+    );
+  }
+
+  function addNominee() {
+    if (nominees.length >= 3) return;
+
+    const count = nominees.length + 1;
+    const basePercentage = Math.floor(100 / count);
+    const remainder = 100 - basePercentage * count;
+
+    setNominees((current) => [
+      ...current.map((nominee, index) => ({
+        ...nominee,
+        percentage: String(
+          basePercentage + (index < remainder ? 1 : 0)
+        ),
+      })),
+      {
+        ...createNominee(nextNomineeId),
+        percentage: String(
+          basePercentage + (current.length < remainder ? 1 : 0)
+        ),
+      },
+    ]);
+
+    setNextNomineeId((id) => id + 1);
+  }
+
+  function removeNominee(id: number) {
+    const remaining = nominees.filter((nominee) => nominee.id !== id);
+    if (remaining.length === 0) return;
+
+    const basePercentage = Math.floor(100 / remaining.length);
+    const remainder = 100 - basePercentage * remaining.length;
+
+    setNominees(
+      remaining.map((nominee, index) => ({
+        ...nominee,
+        percentage: String(
+          basePercentage + (index < remainder ? 1 : 0)
+        ),
+      }))
+    );
+  }
   function requestOtp() {
     setError("");
     setInfo("");
@@ -244,7 +306,37 @@ export default function SignupPage() {
   function saveNseRegistration(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setInfo("");
 
+    if (nominees.length === 0) {
+      setError("Please add at least one nominee.");
+      return;
+    }
+
+    const totalAllocation = nominees.reduce(
+      (total, nominee) => total + Number(nominee.percentage || 0),
+      0
+    );
+
+    if (
+      nominees.some(
+        (nominee) =>
+          nominee.percentage.trim() === "" ||
+          !Number.isInteger(Number(nominee.percentage)) ||
+          Number(nominee.percentage) < 1 ||
+          Number(nominee.percentage) > 100
+      )
+    ) {
+      setError("Each nominee's allocation must be a whole number between 1% and 100%.");
+      return;
+    }
+
+    if (totalAllocation !== 100) {
+      setError(
+        `Nominee allocation must total exactly 100%. Current total: ${totalAllocation}%.`
+      );
+      return;
+    }
     if (!accountNumber.trim() || !accountType || !ifsc.trim()) {
       setError("Please enter your account number, account type and IFSC.");
       return;
@@ -283,15 +375,8 @@ export default function SignupPage() {
     setOccupation("");
     setAnnualIncome("");
     setPep("");
-    setNomineeType("major");
-    setNomineeName("");
-    setNomineeDob("");
-    setNomineeEmail("");
-    setNomineePhone("");
-    setIdType("");
-    setIdNumber("");
-    setNomineeAddress("");
-    setRelationship("");
+    setNominees([createNominee(1)]);
+    setNextNomineeId(2);
     setUseUserAddress(true);
     setAccountNumber("");
     setAccountType("");
@@ -1039,330 +1124,396 @@ export default function SignupPage() {
                     </div>
 
 
-                    {/* Nominee Details */}
+                    {/* Multiple Nominee Details */}
                     <section className="border-t border-slate-100 pt-5">
-                      <h3 className="mb-3 font-bold text-slate-900">
-                        Nominee Details
-                      </h3>
+                      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <h3 className="font-bold text-slate-900">Nominee Details</h3>
+                          <p className="mt-1 text-sm text-slate-500">
+                            Add up to 3 nominees and allocate the investment percentage.
+                          </p>
+                        </div>
 
-                      {/* Major / Minor switch */}
-                      <div className="mb-4 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
-                        <button
-                          type="button"
-                          onClick={() => setNomineeType("major")}
-                          className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${nomineeType === "major"
-                            ? "bg-white text-blue-700 shadow-sm"
-                            : "text-slate-600 hover:bg-slate-200"
-                            }`}
-                        >
-                          Major
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setNomineeType("minor")}
-                          className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${nomineeType === "minor"
-                            ? "bg-white text-blue-700 shadow-sm"
-                            : "text-slate-600 hover:bg-slate-200"
-                            }`}
-                        >
-                          Minor
-                        </button>
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                          {nominees.length}/3 nominees
+                        </span>
                       </div>
 
-                  
-{/* MAJOR NOMINEE FIELDS */}
-{nomineeType === "major" && (
-  <div className="space-y-4 rounded-xl border border-blue-100 p-4">
-    <h4 className="font-semibold text-blue-950">
-      Nominee Information
-    </h4>
+                      <div className="space-y-5">
+                        {nominees.map((nominee, index) => (
+                          <div
+                            key={nominee.id}
+                            className="space-y-4 rounded-xl border border-blue-100 p-4"
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <h4 className="font-semibold text-blue-950">
+                                Nominee {index + 1}
+                              </h4>
 
-    <div>
-      <label className={labelClass}>Nominee Name *</label>
-      <input
-        className={inputClass}
-        value={nomineeName}
-        onChange={(e) => setNomineeName(e.target.value)}
-        required
-        placeholder="Enter nominee full name"
-      />
-    </div>
+                              {nominees.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeNominee(nominee.id)}
+                                  className="rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
 
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div>
-        <label className={labelClass}>Date of Birth *</label>
-        <input
-          type="date"
-          className={inputClass}
-          value={nomineeDob}
-          onChange={(e) => setNomineeDob(e.target.value)}
-          required
-        />
-      </div>
+                            {/* Major / Minor selection */}
+                            <div>
+                              <label className={labelClass}>Nominee Type *</label>
+                              <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateNominee(nominee.id, "type", "major")
+                                  }
+                                  className={`rounded-lg px-4 py-3 text-sm font-semibold ${nominee.type === "major"
+                                    ? "bg-white text-blue-700 shadow-sm"
+                                    : "text-slate-600 hover:bg-slate-200"
+                                    }`}
+                                >
+                                  Major
+                                </button>
 
-      <div>
-        <label className={labelClass}>Relationship *</label>
-        <select
-          className={inputClass}
-          value={relationship}
-          onChange={(e) => setRelationship(e.target.value)}
-          required
-        >
-          <option value="">Select relationship</option>
-          <option>Spouse</option>
-          <option>Father</option>
-          <option>Mother</option>
-          <option>Son</option>
-          <option>Daughter</option>
-          <option>Brother</option>
-          <option>Sister</option>
-          <option>Other</option>
-        </select>
-      </div>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    updateNominee(nominee.id, "type", "minor")
+                                  }
+                                  className={`rounded-lg px-4 py-3 text-sm font-semibold ${nominee.type === "minor"
+                                    ? "bg-white text-blue-700 shadow-sm"
+                                    : "text-slate-600 hover:bg-slate-200"
+                                    }`}
+                                >
+                                  Minor
+                                </button>
+                              </div>
+                            </div>
 
-      <div>
-        <label className={labelClass}>Email *</label>
-        <input
-          type="email"
-          className={inputClass}
-          value={nomineeEmail}
-          onChange={(e) => setNomineeEmail(e.target.value)}
-          required
-          placeholder="Nominee email"
-        />
-      </div>
+                            {/* Allocation percentage */}
+                            <div className="rounded-lg bg-blue-50 p-3">
+                              <label className={labelClass}>
+                                Allocation Percentage *
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="100"
+                                  step="1"
+                                  className={`${inputClass} pr-10`}
+                                  value={nominee.percentage}
+                                  onChange={(e) =>
+                                    updateNominee(
+                                      nominee.id,
+                                      "percentage",
+                                      e.target.value
+                                    )
+                                  }
+                                  required
+                                  placeholder="Enter percentage"
+                                />
+                                <span className="absolute right-3 top-3 text-sm text-slate-500">
+                                  %
+                                </span>
+                              </div>
+                            </div>
 
-      <div>
-        <label className={labelClass}>Phone Number *</label>
-        <input
-          type="tel"
-          inputMode="numeric"
-          maxLength={10}
-          className={inputClass}
-          value={nomineePhone}
-          onChange={(e) =>
-            setNomineePhone(e.target.value.replace(/\D/g, ""))
-          }
-          required
-          placeholder="10-digit mobile number"
-        />
-      </div>
-    </div>
+                            {/* Common nominee fields */}
+                            <div>
+                              <label className={labelClass}>Nominee Name *</label>
+                              <input
+                                className={inputClass}
+                                value={nominee.name}
+                                onChange={(e) =>
+                                  updateNominee(nominee.id, "name", e.target.value)
+                                }
+                                required
+                                placeholder="Enter nominee full name"
+                              />
+                            </div>
 
-    <div>
-      <label className={labelClass}>Nominee ID Type *</label>
-      <select
-        className={inputClass}
-        value={idType}
-        onChange={(e) => setIdType(e.target.value)}
-        required
-      >
-        <option value="">Select ID type</option>
-        <option value="PAN">PAN</option>
-        <option value="Aadhaar">Aadhaar</option>
-      </select>
-    </div>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                              <div>
+                                <label className={labelClass}>Date of Birth *</label>
+                                <input
+                                  type="date"
+                                  className={inputClass}
+                                  value={nominee.dob}
+                                  onChange={(e) =>
+                                    updateNominee(nominee.id, "dob", e.target.value)
+                                  }
+                                  required
+                                />
+                              </div>
 
-    <div>
-      <label className={labelClass}>
-        {idType === "PAN"
-          ? "Full PAN Number *"
-          : idType === "Aadhaar"
-            ? "Last 4 Digits of Aadhaar *"
-            : "Nominee ID Number *"}
-      </label>
+                              <div>
+                                <label className={labelClass}>Relationship *</label>
+                                <select
+                                  className={inputClass}
+                                  value={nominee.relationship}
+                                  onChange={(e) =>
+                                    updateNominee(
+                                      nominee.id,
+                                      "relationship",
+                                      e.target.value
+                                    )
+                                  }
+                                  required
+                                >
+                                  <option value="">Select relationship</option>
+                                  <option>Spouse</option>
+                                  <option>Father</option>
+                                  <option>Mother</option>
+                                  <option>Son</option>
+                                  <option>Daughter</option>
+                                  <option>Brother</option>
+                                  <option>Sister</option>
+                                  <option>Other</option>
+                                </select>
+                              </div>
 
-      <input
-        type="text"
-        className={inputClass}
-        value={idNumber}
-        onChange={(e) =>
-          setIdNumber(
-            idType === "Aadhaar"
-              ? e.target.value.replace(/\D/g, "").slice(0, 4)
-              : e.target.value
-                  .toUpperCase()
-                  .replace(/[^A-Z0-9]/g, "")
-                  .slice(0, 10)
-          )
-        }
-        maxLength={idType === "PAN" ? 10 : 4}
-        minLength={idType === "PAN" ? 10 : 4}
-        required
-        placeholder={
-          idType === "PAN"
-            ? "Enter full PAN number"
-            : idType === "Aadhaar"
-              ? "Enter last 4 Aadhaar digits"
-              : "Select ID type first"
-        }
-        disabled={!idType}
-      />
-    </div>
+                              <div>
+                                <label className={labelClass}>Email *</label>
+                                <input
+                                  type="email"
+                                  className={inputClass}
+                                  value={nominee.email}
+                                  onChange={(e) =>
+                                    updateNominee(nominee.id, "email", e.target.value)
+                                  }
+                                  required
+                                  placeholder="Nominee email"
+                                />
+                              </div>
 
-    <div>
-      <label className={labelClass}>Nominee Address *</label>
-      <textarea
-        className={`${inputClass} h-20 py-3`}
-        value={nomineeAddress}
-        onChange={(e) => setNomineeAddress(e.target.value)}
-        required
-        placeholder="Enter nominee address"
-      />
-    </div>
-  </div>
-)}
+                              <div>
+                                <label className={labelClass}>Phone Number *</label>
+                                <input
+                                  type="tel"
+                                  inputMode="numeric"
+                                  maxLength={10}
+                                  className={inputClass}
+                                  value={nominee.phone}
+                                  onChange={(e) =>
+                                    updateNominee(
+                                      nominee.id,
+                                      "phone",
+                                      e.target.value.replace(/\D/g, "").slice(0, 10)
+                                    )
+                                  }
+                                  required
+                                  pattern="[0-9]{10}"
+                                  placeholder="10-digit mobile number"
+                                />
+                              </div>
+                            </div>
 
-{/* MINOR NOMINEE FIELDS */}
-{nomineeType === "minor" && (
-  <div className="space-y-4 rounded-xl border border-violet-200 bg-violet-50/50 p-4">
-    <h4 className="font-semibold text-violet-950">
-      Minor Nominee Information
-    </h4>
+                            {/* ID information */}
+                            <div>
+                              <label className={labelClass}>Nominee ID Type *</label>
+                              <select
+                                className={inputClass}
+                                value={nominee.idType}
+                                onChange={(e) => {
+                                  updateNominee(nominee.id, "idType", e.target.value);
+                                  updateNominee(nominee.id, "idNumber", "");
+                                }}
+                                required
+                              >
+                                <option value="">Select ID type</option>
+                                <option value="PAN">PAN</option>
+                                <option value="Aadhaar">Aadhaar</option>
+                              </select>
+                            </div>
 
-    <p className="text-sm text-slate-600">
-      Enter the minor nominee's details and guardian information.
-    </p>
+                            <div>
+                              <label className={labelClass}>
+                                {nominee.idType === "PAN"
+                                  ? "Full PAN Number *"
+                                  : nominee.idType === "Aadhaar"
+                                    ? "Last 4 Digits of Aadhaar *"
+                                    : "Nominee ID Number *"}
+                              </label>
 
-    <div>
-      <label className={labelClass}>Nominee Name *</label>
-      <input
-        className={inputClass}
-        value={nomineeName}
-        onChange={(e) => setNomineeName(e.target.value)}
-        required
-        placeholder="Enter nominee full name"
-      />
-    </div>
+                              <input
+                                type="text"
+                                className={inputClass}
+                                value={nominee.idNumber}
+                                onChange={(e) => {
+                                  const value =
+                                    nominee.idType === "Aadhaar"
+                                      ? e.target.value.replace(/\D/g, "").slice(0, 4)
+                                      : e.target.value
+                                        .toUpperCase()
+                                        .replace(/[^A-Z0-9]/g, "")
+                                        .slice(0, 10);
 
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div>
-        <label className={labelClass}>Date of Birth *</label>
-        <input
-          type="date"
-          className={inputClass}
-          value={nomineeDob}
-          onChange={(e) => setNomineeDob(e.target.value)}
-          required
-        />
-      </div>
+                                  updateNominee(nominee.id, "idNumber", value);
+                                }}
+                                maxLength={nominee.idType === "PAN" ? 10 : 4}
+                                minLength={nominee.idType === "PAN" ? 10 : 4}
+                                pattern={
+                                  nominee.idType === "PAN"
+                                    ? "[A-Z]{5}[0-9]{4}[A-Z]"
+                                    : nominee.idType === "Aadhaar"
+                                      ? "[0-9]{4}"
+                                      : undefined
+                                }
+                                required
+                                disabled={!nominee.idType}
+                                placeholder={
+                                  nominee.idType === "PAN"
+                                    ? "Enter full PAN number"
+                                    : nominee.idType === "Aadhaar"
+                                      ? "Enter last 4 Aadhaar digits"
+                                      : "Select ID type first"
+                                }
+                              />
+                            </div>
 
-      <div>
-        <label className={labelClass}>Relationship *</label>
-        <select
-          className={inputClass}
-          value={relationship}
-          onChange={(e) => setRelationship(e.target.value)}
-          required
-        >
-          <option value="">Select relationship</option>
-          <option>Spouse</option>
-          <option>Father</option>
-          <option>Mother</option>
-          <option>Son</option>
-          <option>Daughter</option>
-          <option>Brother</option>
-          <option>Sister</option>
-          <option>Other</option>
-        </select>
-      </div>
+                            <div>
+                              <label className={labelClass}>Nominee Address *</label>
+                              <textarea
+                                className={`${inputClass} h-20 py-3`}
+                                value={nominee.address}
+                                onChange={(e) =>
+                                  updateNominee(nominee.id, "address", e.target.value)
+                                }
+                                required
+                                placeholder="Enter nominee address"
+                              />
+                            </div>
 
-      <div>
-        <label className={labelClass}>Email *</label>
-        <input
-          type="email"
-          className={inputClass}
-          value={nomineeEmail}
-          onChange={(e) => setNomineeEmail(e.target.value)}
-          required
-          placeholder="Nominee email"
-        />
-      </div>
+                            {/* Additional guardian fields for minor nominees */}
+                            {nominee.type === "minor" && (
+                              <div className="space-y-4 rounded-xl border border-violet-200 bg-violet-50/50 p-4">
+                                <h5 className="font-semibold text-violet-950">
+                                  Guardian Information
+                                </h5>
 
-      <div>
-        <label className={labelClass}>Phone Number *</label>
-        <input
-          type="tel"
-          inputMode="numeric"
-          maxLength={10}
-          className={inputClass}
-          value={nomineePhone}
-          onChange={(e) =>
-            setNomineePhone(e.target.value.replace(/\D/g, ""))
-          }
-          required
-          placeholder="10-digit mobile number"
-        />
-      </div>
-    </div>
+                                <div>
+                                  <label className={labelClass}>Guardian Name *</label>
+                                  <input
+                                    className={inputClass}
+                                    value={nominee.guardianName}
+                                    onChange={(e) =>
+                                      updateNominee(
+                                        nominee.id,
+                                        "guardianName",
+                                        e.target.value
+                                      )
+                                    }
+                                    required
+                                    placeholder="Enter guardian full name"
+                                  />
+                                </div>
 
-    <div>
-      <label className={labelClass}>Nominee ID Type *</label>
-      <select
-        className={inputClass}
-        value={idType}
-        onChange={(e) => setIdType(e.target.value)}
-        required
-      >
-        <option value="">Select ID type</option>
-        <option value="PAN">PAN</option>
-        <option value="Aadhaar">Aadhaar</option>
-      </select>
-    </div>
+                                <div>
+                                  <label className={labelClass}>
+                                    Guardian Relationship *
+                                  </label>
+                                  <select
+                                    className={inputClass}
+                                    value={nominee.guardianRelationship}
+                                    onChange={(e) =>
+                                      updateNominee(
+                                        nominee.id,
+                                        "guardianRelationship",
+                                        e.target.value
+                                      )
+                                    }
+                                    required
+                                  >
+                                    <option value="Father">Father</option>
+                                    <option value="Mother">Mother</option>
+                                    <option value="Legal Guardian">Legal Guardian</option>
+                                  </select>
+                                </div>
 
-    <div>
-      <label className={labelClass}>
-        {idType === "PAN"
-          ? "Full PAN Number *"
-          : idType === "Aadhaar"
-            ? "Last 4 Digits of Aadhaar *"
-            : "Nominee ID Number *"}
-      </label>
+                                <div>
+                                  <label className={labelClass}>Guardian PAN *</label>
+                                  <input
+                                    className={inputClass}
+                                    value={nominee.guardianPan}
+                                    onChange={(e) =>
+                                      updateNominee(
+                                        nominee.id,
+                                        "guardianPan",
+                                        e.target.value
+                                          .toUpperCase()
+                                          .replace(/[^A-Z0-9]/g, "")
+                                          .slice(0, 10)
+                                      )
+                                    }
+                                    required
+                                    minLength={10}
+                                    maxLength={10}
+                                    pattern="[A-Z]{5}[0-9]{4}[A-Z]"
+                                    placeholder="Enter guardian PAN"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
 
-      <input
-        type="text"
-        className={inputClass}
-        value={idNumber}
-        onChange={(e) =>
-          setIdNumber(
-            idType === "Aadhaar"
-              ? e.target.value.replace(/\D/g, "").slice(0, 4)
-              : e.target.value
-                  .toUpperCase()
-                  .replace(/[^A-Z0-9]/g, "")
-                  .slice(0, 10)
-          )
-        }
-        maxLength={idType === "PAN" ? 10 : 4}
-        minLength={idType === "PAN" ? 10 : 4}
-        required
-        placeholder={
-          idType === "PAN"
-            ? "Enter full PAN number"
-            : idType === "Aadhaar"
-              ? "Enter last 4 Aadhaar digits"
-              : "Select ID type first"
-        }
-        disabled={!idType}
-      />
-    </div>
+                      {/* Live allocation summary */}
+                      <div
+                        className={`mt-4 rounded-xl border p-4 ${nomineeTotal === 100
+                          ? "border-emerald-200 bg-emerald-50"
+                          : "border-amber-200 bg-amber-50"
+                          }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-sm font-semibold text-slate-800">
+                            Total allocation
+                          </span>
+                          <span
+                            className={`text-lg font-bold ${nomineeTotal === 100 ? "text-emerald-700" : "text-amber-700"
+                              }`}
+                          >
+                            {nomineeTotal}%
+                          </span>
+                        </div>
 
-    <div>
-      <label className={labelClass}>Nominee Address *</label>
-      <textarea
-        className={`${inputClass} h-20 py-3`}
-        value={nomineeAddress}
-        onChange={(e) => setNomineeAddress(e.target.value)}
-        required
-        placeholder="Enter nominee address"
-      />
-    </div>
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-white">
+                          <div
+                            className={`h-full rounded-full transition-all ${nomineeTotal === 100 ? "bg-emerald-500" : "bg-amber-500"
+                              }`}
+                            style={{
+                              width: `${Math.min(nomineeTotal, 100)}%`,
+                            }}
+                          />
+                        </div>
 
-    
-  </div>
-)}
+                        <p className="mt-2 text-xs leading-5 text-slate-600">
+                          {nomineeTotal === 100
+                            ? "Your nominee allocation adds up to 100%."
+                            : nomineeTotal < 100
+                              ? `Allocate another ${100 - nomineeTotal}% to reach 100%.`
+                              : `Allocation exceeds 100% by ${nomineeTotal - 100}%. Please adjust the percentages.`}
+                        </p>
+                      </div>
 
+                      {nominees.length < 3 && (
+                        <button
+                          type="button"
+                          onClick={addNominee}
+                          className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+                        >
+                          <span className="text-lg leading-none">+</span>
+                          Add Another Nominee
+                        </button>
+                      )}
+
+                      <p className="mt-2 text-xs text-slate-500">
+                        The total nominee allocation must equal 100% before registration can be submitted.
+                      </p>
                     </section>
 
 
