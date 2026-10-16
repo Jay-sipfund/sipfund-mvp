@@ -19,6 +19,39 @@ import {
 
 type KycStatus = "success" | "failed" | null;
 type Screen = "signup" | "registration" | "dashboard";
+type Nominee = {
+  id: number;
+  type: "major" | "minor";
+  name: string;
+  dob: string;
+  relationship: string;
+  email: string;
+  phone: string;
+  idType: string;
+  idNumber: string;
+  address: string;
+  percentage: string;
+  guardianName: string;
+  guardianRelationship: string;
+  guardianPan: string;
+};
+
+const createNominee = (id: number): Nominee => ({
+  id,
+  type: "major",
+  name: "",
+  dob: "",
+  relationship: "",
+  email: "",
+  phone: "",
+  idType: "",
+  idNumber: "",
+  address: "",
+  percentage: "100",
+  guardianName: "",
+  guardianRelationship: "Father",
+  guardianPan: "",
+});
 
 const funds = [
   {
@@ -1037,185 +1070,299 @@ export default function SignupPage() {
                         </button>
                       </div>
 
-                      {/* MAJOR NOMINEE FIELDS */}
-                      {nomineeType === "major" && (
-                        <div className="space-y-4 rounded-xl border border-blue-100 p-4">
-                          <h4 className="font-semibold text-blue-950">
-                            Nominee Information
-                          </h4>
+                  
+{/* MAJOR NOMINEE FIELDS */}
+{nomineeType === "major" && (
+  <div className="space-y-4 rounded-xl border border-blue-100 p-4">
+    <h4 className="font-semibold text-blue-950">
+      Nominee Information
+    </h4>
 
-                          <div>
-                            <label className={labelClass}>Nominee Name *</label>
-                            <input
-                              className={inputClass}
-                              value={nomineeName}
-                              onChange={(e) => setNomineeName(e.target.value)}
-                              required
-                              placeholder="Enter nominee full name"
-                            />
-                          </div>
+    <div>
+      <label className={labelClass}>Nominee Name *</label>
+      <input
+        className={inputClass}
+        value={nomineeName}
+        onChange={(e) => setNomineeName(e.target.value)}
+        required
+        placeholder="Enter nominee full name"
+      />
+    </div>
 
-                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div>
-                              <label className={labelClass}>Date of Birth *</label>
-                              <input
-                                type="date"
-                                className={inputClass}
-                                value={nomineeDob}
-                                onChange={(e) => setNomineeDob(e.target.value)}
-                                required
-                              />
-                            </div>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label className={labelClass}>Date of Birth *</label>
+        <input
+          type="date"
+          className={inputClass}
+          value={nomineeDob}
+          onChange={(e) => setNomineeDob(e.target.value)}
+          required
+        />
+      </div>
 
-                            <div>
-                              <label className={labelClass}>Relationship *</label>
-                              <select
-                                className={inputClass}
-                                value={relationship}
-                                onChange={(e) => setRelationship(e.target.value)}
-                                required
-                              >
-                                <option value="">Select relationship</option>
-                                <option>Spouse</option>
-                                <option>Father</option>
-                                <option>Mother</option>
-                                <option>Son</option>
-                                <option>Daughter</option>
-                                <option>Brother</option>
-                                <option>Sister</option>
-                                <option>Other</option>
-                              </select>
-                            </div>
+      <div>
+        <label className={labelClass}>Relationship *</label>
+        <select
+          className={inputClass}
+          value={relationship}
+          onChange={(e) => setRelationship(e.target.value)}
+          required
+        >
+          <option value="">Select relationship</option>
+          <option>Spouse</option>
+          <option>Father</option>
+          <option>Mother</option>
+          <option>Son</option>
+          <option>Daughter</option>
+          <option>Brother</option>
+          <option>Sister</option>
+          <option>Other</option>
+        </select>
+      </div>
 
-                            <div>
-                              <label className={labelClass}>Email *</label>
-                              <input
-                                type="email"
-                                className={inputClass}
-                                value={nomineeEmail}
-                                onChange={(e) => setNomineeEmail(e.target.value)}
-                                required
-                                placeholder="Nominee email"
-                              />
-                            </div>
+      <div>
+        <label className={labelClass}>Email *</label>
+        <input
+          type="email"
+          className={inputClass}
+          value={nomineeEmail}
+          onChange={(e) => setNomineeEmail(e.target.value)}
+          required
+          placeholder="Nominee email"
+        />
+      </div>
 
-                            <div>
-                              <label className={labelClass}>Phone Number *</label>
-                              <input
-                                type="tel"
-                                inputMode="numeric"
-                                maxLength={10}
-                                className={inputClass}
-                                value={nomineePhone}
-                                onChange={(e) =>
-                                  setNomineePhone(e.target.value.replace(/\D/g, ""))
-                                }
-                                required
-                                placeholder="10-digit mobile number"
-                              />
-                            </div>
-                          </div>
+      <div>
+        <label className={labelClass}>Phone Number *</label>
+        <input
+          type="tel"
+          inputMode="numeric"
+          maxLength={10}
+          className={inputClass}
+          value={nomineePhone}
+          onChange={(e) =>
+            setNomineePhone(e.target.value.replace(/\D/g, ""))
+          }
+          required
+          placeholder="10-digit mobile number"
+        />
+      </div>
+    </div>
 
-                          <div>
-                            <label className={labelClass}>Nominee ID Type *</label>
-                            <select
-                              className={inputClass}
-                              value={idType}
-                              onChange={(e) => setIdType(e.target.value)}
-                              required
-                            >
-                              <option value="">Select ID type</option>
-                              <option value="PAN">PAN</option>
-                              <option value="Aadhaar">Aadhaar</option>
-                            </select>
-                          </div>
+    <div>
+      <label className={labelClass}>Nominee ID Type *</label>
+      <select
+        className={inputClass}
+        value={idType}
+        onChange={(e) => setIdType(e.target.value)}
+        required
+      >
+        <option value="">Select ID type</option>
+        <option value="PAN">PAN</option>
+        <option value="Aadhaar">Aadhaar</option>
+      </select>
+    </div>
 
-                          <div>
-                            <label className={labelClass}>
-                              Last 4 Digits of {idType || "ID"} *
-                            </label>
-                            <input
-                              className={inputClass}
-                              value={idNumber}
-                              onChange={(e) =>
-                                setIdNumber(
-                                  idType === "Aadhaar"
-                                    ? e.target.value.replace(/\D/g, "").slice(0, 4)
-                                    : e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4)
-                                )
-                              }
-                              maxLength={4}
-                              minLength={4}
-                              required
-                              placeholder="Enter last 4 digits"
-                            />
-                          </div>
+    <div>
+      <label className={labelClass}>
+        {idType === "PAN"
+          ? "Full PAN Number *"
+          : idType === "Aadhaar"
+            ? "Last 4 Digits of Aadhaar *"
+            : "Nominee ID Number *"}
+      </label>
 
-                          <div>
-                            <label className={labelClass}>Nominee Address *</label>
-                            <textarea
-                              className={`${inputClass} h-20 py-3`}
-                              value={nomineeAddress}
-                              onChange={(e) => setNomineeAddress(e.target.value)}
-                              required
-                              placeholder="Enter nominee address"
-                            />
-                          </div>
-                        </div>
-                      )}
+      <input
+        type="text"
+        className={inputClass}
+        value={idNumber}
+        onChange={(e) =>
+          setIdNumber(
+            idType === "Aadhaar"
+              ? e.target.value.replace(/\D/g, "").slice(0, 4)
+              : e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z0-9]/g, "")
+                  .slice(0, 10)
+          )
+        }
+        maxLength={idType === "PAN" ? 10 : 4}
+        minLength={idType === "PAN" ? 10 : 4}
+        required
+        placeholder={
+          idType === "PAN"
+            ? "Enter full PAN number"
+            : idType === "Aadhaar"
+              ? "Enter last 4 Aadhaar digits"
+              : "Select ID type first"
+        }
+        disabled={!idType}
+      />
+    </div>
 
-                      {/* MINOR NOMINEE FIELDS */}
-                      {nomineeType === "minor" && (
-                        <div className="space-y-4 rounded-xl border border-violet-200 bg-violet-50/50 p-4">
-                          <h4 className="font-semibold text-violet-950">
-                            Guardian Information
-                          </h4>
+    <div>
+      <label className={labelClass}>Nominee Address *</label>
+      <textarea
+        className={`${inputClass} h-20 py-3`}
+        value={nomineeAddress}
+        onChange={(e) => setNomineeAddress(e.target.value)}
+        required
+        placeholder="Enter nominee address"
+      />
+    </div>
+  </div>
+)}
 
-                          <p className="text-sm text-slate-600">
-                            Enter the guardian details for the minor nominee.
-                          </p>
+{/* MINOR NOMINEE FIELDS */}
+{nomineeType === "minor" && (
+  <div className="space-y-4 rounded-xl border border-violet-200 bg-violet-50/50 p-4">
+    <h4 className="font-semibold text-violet-950">
+      Minor Nominee Information
+    </h4>
 
-                          <div>
-                            <label className={labelClass}>Guardian Name *</label>
-                            <input
-                              className={inputClass}
-                              value={guardianName}
-                              onChange={(e) => setGuardianName(e.target.value)}
-                              required
-                              placeholder="Enter guardian full name"
-                            />
-                          </div>
+    <p className="text-sm text-slate-600">
+      Enter the minor nominee's details and guardian information.
+    </p>
 
-                          {/* <div>
-                            <label className={labelClass}>Relationship to Minor *</label>
-                            <select
-                              className={inputClass}
-                              value={guardianRelationship}
-                              onChange={(e) => setGuardianRelationship(e.target.value)}
-                              required
-                            >
-                              <option value="">Select relationship</option>
-                              <option>Father</option>
-                              <option>Mother</option>
-                              <option>Legal Guardian</option>
-                              <option>Other</option>
-                            </select>
-                          </div> */}
+    <div>
+      <label className={labelClass}>Nominee Name *</label>
+      <input
+        className={inputClass}
+        value={nomineeName}
+        onChange={(e) => setNomineeName(e.target.value)}
+        required
+        placeholder="Enter nominee full name"
+      />
+    </div>
 
-                          <div>
-                            <label className={labelClass}>Guardian PAN Number *</label>
-                            <input
-                              className={inputClass}
-                              value={guardianPan}
-                              onChange={(e) => setGuardianPan(e.target.value.toUpperCase())}
-                              maxLength={10}
-                              minLength={10}
-                              required
-                              placeholder="Enter guardian PAN"
-                            />
-                          </div>
-                        </div>
-                      )}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label className={labelClass}>Date of Birth *</label>
+        <input
+          type="date"
+          className={inputClass}
+          value={nomineeDob}
+          onChange={(e) => setNomineeDob(e.target.value)}
+          required
+        />
+      </div>
+
+      <div>
+        <label className={labelClass}>Relationship *</label>
+        <select
+          className={inputClass}
+          value={relationship}
+          onChange={(e) => setRelationship(e.target.value)}
+          required
+        >
+          <option value="">Select relationship</option>
+          <option>Spouse</option>
+          <option>Father</option>
+          <option>Mother</option>
+          <option>Son</option>
+          <option>Daughter</option>
+          <option>Brother</option>
+          <option>Sister</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label className={labelClass}>Email *</label>
+        <input
+          type="email"
+          className={inputClass}
+          value={nomineeEmail}
+          onChange={(e) => setNomineeEmail(e.target.value)}
+          required
+          placeholder="Nominee email"
+        />
+      </div>
+
+      <div>
+        <label className={labelClass}>Phone Number *</label>
+        <input
+          type="tel"
+          inputMode="numeric"
+          maxLength={10}
+          className={inputClass}
+          value={nomineePhone}
+          onChange={(e) =>
+            setNomineePhone(e.target.value.replace(/\D/g, ""))
+          }
+          required
+          placeholder="10-digit mobile number"
+        />
+      </div>
+    </div>
+
+    <div>
+      <label className={labelClass}>Nominee ID Type *</label>
+      <select
+        className={inputClass}
+        value={idType}
+        onChange={(e) => setIdType(e.target.value)}
+        required
+      >
+        <option value="">Select ID type</option>
+        <option value="PAN">PAN</option>
+        <option value="Aadhaar">Aadhaar</option>
+      </select>
+    </div>
+
+    <div>
+      <label className={labelClass}>
+        {idType === "PAN"
+          ? "Full PAN Number *"
+          : idType === "Aadhaar"
+            ? "Last 4 Digits of Aadhaar *"
+            : "Nominee ID Number *"}
+      </label>
+
+      <input
+        type="text"
+        className={inputClass}
+        value={idNumber}
+        onChange={(e) =>
+          setIdNumber(
+            idType === "Aadhaar"
+              ? e.target.value.replace(/\D/g, "").slice(0, 4)
+              : e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z0-9]/g, "")
+                  .slice(0, 10)
+          )
+        }
+        maxLength={idType === "PAN" ? 10 : 4}
+        minLength={idType === "PAN" ? 10 : 4}
+        required
+        placeholder={
+          idType === "PAN"
+            ? "Enter full PAN number"
+            : idType === "Aadhaar"
+              ? "Enter last 4 Aadhaar digits"
+              : "Select ID type first"
+        }
+        disabled={!idType}
+      />
+    </div>
+
+    <div>
+      <label className={labelClass}>Nominee Address *</label>
+      <textarea
+        className={`${inputClass} h-20 py-3`}
+        value={nomineeAddress}
+        onChange={(e) => setNomineeAddress(e.target.value)}
+        required
+        placeholder="Enter nominee address"
+      />
+    </div>
+
+    
+  </div>
+)}
+
                     </section>
 
 
