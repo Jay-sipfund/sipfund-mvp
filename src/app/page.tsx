@@ -92,7 +92,13 @@ export default function SignupPage() {
   const [guardianName, setGuardianName] = useState("Ravi Kumar");
   const [guardianRelationship, setGuardianRelationship] = useState("Father");
   const [guardianPan, setGuardianPan] = useState("FGHIJ5678K");
-
+  const [kycFullName, setKycFullName] = useState("Jayanth Kumar");
+  const [kycDob, setKycDob] = useState("1995-06-15");
+  const [kycGender, setKycGender] = useState("Male");
+  const [kycAddress, setKycAddress] = useState("12 MG Road");
+  const [kycCity, setKycCity] = useState("Bengaluru");
+  const [kycState, setKycState] = useState("Karnataka");
+  const [kycPincode, setKycPincode] = useState("560001");
   const inputClass =
     "h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100";
 
@@ -154,13 +160,19 @@ export default function SignupPage() {
     }
   }
 
+
   function openRegistration(step: 3 | 4) {
+    if (step === 3) {
+      setShowKycComplete(false);
+    }
+
     setRegistrationStep(step);
     setScreen("registration");
     setBuyFundName(null);
     setError("");
     setInfo("");
   }
+
 
   function exploreFunds() {
     setScreen("dashboard");
@@ -512,9 +524,14 @@ export default function SignupPage() {
                     <div className="mt-4 grid gap-3">
                       <button
                         type="button"
-                        onClick={() =>
-                          openRegistration(kycStatus === "success" ? 4 : 3)
-                        }
+                        onClick={() => {
+                          if (kycStatus === "success") {
+                            openRegistration(4);
+                          } else {
+                            setShowKycComplete(false);
+                            openRegistration(3);
+                          }
+                        }}
                         className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
                       >
                         {kycStatus === "success"
@@ -621,6 +638,292 @@ export default function SignupPage() {
                   <>
                     {/* Keep your existing Step 3 content here:
           DigiLocker / Manual Entry tabs and their forms */}
+
+                    <div className="space-y-5">
+                      <div>
+                        <h2 className="text-lg font-bold text-slate-900">
+                          Complete Your KYC
+                        </h2>
+                        <p className="mt-1 text-sm leading-6 text-slate-500">
+                          Choose how you want to provide your personal details.
+                        </p>
+                      </div>
+
+                      {/* Entry method switch */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setKycEntryMode("digilocker");
+                            setError("");
+                            setInfo("");
+                          }}
+                          className={`rounded-xl border p-4 text-left transition ${kycEntryMode === "digilocker"
+                            ? "border-blue-600 bg-blue-50 ring-2 ring-blue-100"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                            }`}
+                        >
+                          <ShieldCheck
+                            className={`mb-2 h-6 w-6 ${kycEntryMode === "digilocker"
+                              ? "text-blue-600"
+                              : "text-slate-400"
+                              }`}
+                          />
+                          <span className="block text-sm font-bold text-slate-900">
+                            DigiLocker
+                          </span>
+                          <span className="mt-1 block text-xs text-slate-500">
+                            Auto-fill details
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setKycEntryMode("manual");
+                            setError("");
+                            setInfo("");
+                          }}
+                          className={`rounded-xl border p-4 text-left transition ${kycEntryMode === "manual"
+                            ? "border-blue-600 bg-blue-50 ring-2 ring-blue-100"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                            }`}
+                        >
+                          <UserRound
+                            className={`mb-2 h-6 w-6 ${kycEntryMode === "manual"
+                              ? "text-blue-600"
+                              : "text-slate-400"
+                              }`}
+                          />
+                          <span className="block text-sm font-bold text-slate-900">
+                            Fill Manually
+                          </span>
+                          <span className="mt-1 block text-xs text-slate-500">
+                            Enter details yourself
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* DigiLocker mode: pre-filled, read-only demo details */}
+                      {kycEntryMode === "digilocker" && (
+                        <div className="space-y-4">
+                          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                              <p className="text-sm font-semibold text-blue-900">
+                                DigiLocker details retrieved
+                              </p>
+                            </div>
+                            <p className="mt-1 text-xs leading-5 text-blue-800">
+                              Demo mode: sample details are auto-filled. No real DigiLocker
+                              connection or document retrieval is performed.
+                            </p>
+                          </div>
+
+                          <form onSubmit={saveKyc} className="space-y-4">
+                            <div>
+                              <label className={labelClass}>PAN Number</label>
+                              <input
+                                className={inputClass}
+                                value={pan}
+                                readOnly
+                              />
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>Full Name</label>
+                              <input
+                                className={inputClass}
+                                value={kycFullName}
+                                readOnly
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                              <div>
+                                <label className={labelClass}>Date of Birth</label>
+                                <input
+                                  type="date"
+                                  className={inputClass}
+                                  value={kycDob}
+                                  readOnly
+                                />
+                              </div>
+                              <div>
+                                <label className={labelClass}>Gender</label>
+                                <input
+                                  className={inputClass}
+                                  value={kycGender}
+                                  readOnly
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>Address</label>
+                              <input
+                                className={inputClass}
+                                value={kycAddress}
+                                readOnly
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                              <div>
+                                <label className={labelClass}>City</label>
+                                <input
+                                  className={inputClass}
+                                  value={kycCity}
+                                  readOnly
+                                />
+                              </div>
+                              <div>
+                                <label className={labelClass}>State</label>
+                                <input
+                                  className={inputClass}
+                                  value={kycState}
+                                  readOnly
+                                />
+                              </div>
+                              <div>
+                                <label className={labelClass}>PIN Code</label>
+                                <input
+                                  className={inputClass}
+                                  value={kycPincode}
+                                  readOnly
+                                />
+                              </div>
+                            </div>
+
+                            <button
+                              type="submit"
+                              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                            >
+                              Confirm Details & Complete KYC
+                              <ArrowRight size={17} />
+                            </button>
+                          </form>
+                        </div>
+                      )}
+
+                      {/* Manual mode: same demo details, editable */}
+                      {kycEntryMode === "manual" && (
+                        <form onSubmit={saveKyc} className="space-y-4">
+                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <p className="text-sm font-semibold text-slate-800">
+                              Enter your personal details
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-slate-500">
+                              Sample data is provided to make demo testing faster. You can edit
+                              the fields before submitting.
+                            </p>
+                          </div>
+
+                          <div>
+                            <label className={labelClass}>PAN Number *</label>
+                            <input
+                              className={inputClass}
+                              value={pan}
+                              onChange={(e) => setPan(e.target.value.toUpperCase())}
+                              required
+                              maxLength={10}
+                            />
+                          </div>
+
+                          <div>
+                            <label className={labelClass}>Full Name *</label>
+                            <input
+                              className={inputClass}
+                              value={kycFullName}
+                              onChange={(e) => setKycFullName(e.target.value)}
+                              required
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                              <label className={labelClass}>Date of Birth *</label>
+                              <input
+                                type="date"
+                                className={inputClass}
+                                value={kycDob}
+                                onChange={(e) => setKycDob(e.target.value)}
+                                required
+                              />
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>Gender *</label>
+                              <select
+                                className={inputClass}
+                                value={kycGender}
+                                onChange={(e) => setKycGender(e.target.value)}
+                                required
+                              >
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className={labelClass}>Address *</label>
+                            <input
+                              className={inputClass}
+                              value={kycAddress}
+                              onChange={(e) => setKycAddress(e.target.value)}
+                              required
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div>
+                              <label className={labelClass}>City *</label>
+                              <input
+                                className={inputClass}
+                                value={kycCity}
+                                onChange={(e) => setKycCity(e.target.value)}
+                                required
+                              />
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>State *</label>
+                              <input
+                                className={inputClass}
+                                value={kycState}
+                                onChange={(e) => setKycState(e.target.value)}
+                                required
+                              />
+                            </div>
+
+                            <div>
+                              <label className={labelClass}>PIN Code *</label>
+                              <input
+                                className={inputClass}
+                                inputMode="numeric"
+                                maxLength={6}
+                                value={kycPincode}
+                                onChange={(e) =>
+                                  setKycPincode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                                }
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          <button
+                            type="submit"
+                            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                          >
+                            Submit KYC Details
+                            <ArrowRight size={17} />
+                          </button>
+                        </form>
+                      )}
+                    </div>
+
                   </>
                 )
               ) : (
@@ -715,8 +1018,8 @@ export default function SignupPage() {
                           type="button"
                           onClick={() => setNomineeType("major")}
                           className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${nomineeType === "major"
-                              ? "bg-white text-blue-700 shadow-sm"
-                              : "text-slate-600 hover:bg-slate-200"
+                            ? "bg-white text-blue-700 shadow-sm"
+                            : "text-slate-600 hover:bg-slate-200"
                             }`}
                         >
                           Major
@@ -726,8 +1029,8 @@ export default function SignupPage() {
                           type="button"
                           onClick={() => setNomineeType("minor")}
                           className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${nomineeType === "minor"
-                              ? "bg-white text-blue-700 shadow-sm"
-                              : "text-slate-600 hover:bg-slate-200"
+                            ? "bg-white text-blue-700 shadow-sm"
+                            : "text-slate-600 hover:bg-slate-200"
                             }`}
                         >
                           Minor
@@ -1005,8 +1308,10 @@ export default function SignupPage() {
                 {kycStatus !== "success" && (
                   <button
                     type="button"
-                    onClick={() => openRegistration(3)}
-                    className="mt-3 text-sm font-semibold text-blue-700 hover:underline"
+                    onClick={() => {
+                      setShowKycComplete(false);
+                      openRegistration(3);
+                    }} className="mt-3 text-sm font-semibold text-blue-700 hover:underline"
                   >
                     Complete KYC <ArrowRight className="inline h-4 w-4" />
                   </button>
