@@ -479,9 +479,11 @@ export default function SignupPage() {
                     onChange={(e) => setMobileOwner(e.target.value)}
                   >
                     <option value="">Select ownership</option>
-                    <option value="me">Me</option>
+                    <option value="me">Myself</option>
                     <option value="father">Father</option>
                     <option value="mother">Mother</option>
+                    <option value="mother">Spouse</option>
+
                   </select>
                 </div>
 
@@ -519,9 +521,11 @@ export default function SignupPage() {
                     onChange={(e) => setEmailOwner(e.target.value)}
                   >
                     <option value="">Select ownership</option>
-                    <option value="me">Me</option>
+                    <option value="me">Myself</option>
                     <option value="father">Father</option>
                     <option value="mother">Mother</option>
+                    <option value="mother">Spouse</option>
+
                   </select>
                 </div>
 
