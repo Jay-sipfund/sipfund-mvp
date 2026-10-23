@@ -37,20 +37,20 @@ type Nominee = {
 };
 
 const createNominee = (id: number): Nominee => ({
-  id,
+  id: 1,
   type: "major",
-  name: "",
-  dob: "",
-  relationship: "",
-  email: "",
-  phone: "",
-  idType: "",
-  idNumber: "",
-  address: "",
   percentage: "100",
-  guardianName: "",
+  name: "Priya Sharma",
+  dob: "1995-05-15",
+  relationship: "Spouse",
+  email: "priya.test@example.com",
+  phone: "9876543210",
+  idType: "PAN",
+  idNumber: "ABCPD1234E",
+  address: "123 Demo Street, Bengaluru, Karnataka",
+  guardianName: "John",
   guardianRelationship: "Father",
-  guardianPan: "",
+  guardianPan: "ABCPD1234E",
 });
 
 const funds = [
@@ -86,7 +86,7 @@ const funds = [
 
 export default function SignupPage() {
   const [screen, setScreen] = useState<Screen>("signup");
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState("1234567890");
   const [email, setEmail] = useState("");
   const [mobileOwner, setMobileOwner] = useState("");
   const [emailOwner, setEmailOwner] = useState("");
@@ -95,15 +95,18 @@ export default function SignupPage() {
   const [otpVerified, setOtpVerified] = useState(false);
   const [pan, setPan] = useState("");
   const [kycStatus, setKycStatus] = useState<KycStatus>(null);
+  const [showKycResultModal, setShowKycResultModal] = useState(false);
+  const [isEditingKycDetails, setIsEditingKycDetails] = useState(false);
   const [registrationStep, setRegistrationStep] = useState<3 | 4>(3);
   const [nseRegistered, setNseRegistered] = useState(false);
+  const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [buyFundName, setBuyFundName] = useState<string | null>(null);
 
-  const [occupation, setOccupation] = useState("");
-  const [annualIncome, setAnnualIncome] = useState("");
-  const [pep, setPep] = useState("");
+  const [occupation, setOccupation] = useState("Salaried");
+  const [annualIncome, setAnnualIncome] =  useState("Above ₹25 lakh");
+  // const [pep, setPep] = useState("");
   const [nomineeType, setNomineeType] = useState<"major" | "minor">("major");
   const [nomineeName, setNomineeName] = useState("");
   const [nomineeDob, setNomineeDob] = useState("");
@@ -114,17 +117,17 @@ export default function SignupPage() {
   const [nomineeAddress, setNomineeAddress] = useState("");
   const [relationship, setRelationship] = useState("");
   const [useUserAddress, setUseUserAddress] = useState(true);
-  const [accountNumber, setAccountNumber] = useState("");
-  const [accountType, setAccountType] = useState("");
-  const [ifsc, setIfsc] = useState("");
+  const [accountNumber, setAccountNumber] = useState("123456789012");
+  const [accountType, setAccountType] = useState("Savings");
+  const [ifsc, setIfsc] = useState("HDFC0001234");
   const [kycEntryMode, setKycEntryMode] = useState<"digilocker" | "manual">(
     "digilocker"
   );
   const [showKycComplete, setShowKycComplete] = useState(false);
 
-  const [guardianName, setGuardianName] = useState("Ravi Kumar");
+  const [guardianName, setGuardianName] = useState("John");
   const [guardianRelationship, setGuardianRelationship] = useState("Father");
-  const [guardianPan, setGuardianPan] = useState("FGHIJ5678K");
+  const [guardianPan, setGuardianPan] = useState("ABCPD1234E");
   const [kycFullName, setKycFullName] = useState("Jayanth Kumar");
   const [kycDob, setKycDob] = useState("1995-06-15");
   const [kycGender, setKycGender] = useState("Male");
@@ -203,20 +206,20 @@ export default function SignupPage() {
     setError("");
     setInfo("");
 
-    if (!/^[6-9]\d{9}$/.test(mobile)) {
-      setError("Enter a valid 10-digit Indian mobile number.");
+    if (!/^\d{10}$/.test(mobile)) {
+      setError("Enter a valid 10-digit mobile number.");
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Enter a valid email address.");
-      return;
-    }
+    // if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    //   setError("Enter a valid email address.");
+    //   return;
+    // }
 
-    if (!mobileOwner || !emailOwner) {
-      setError("Please select mobile and email ownership.");
-      return;
-    }
+    // if (!mobileOwner || !emailOwner) {
+    //   setError("Please select mobile and email ownership.");
+    //   return;
+    // }
 
     setOtpRequested(true);
     setOtp("");
@@ -245,10 +248,13 @@ export default function SignupPage() {
 
     if (enteredPan === "ABCDE1234S") {
       setKycStatus("success");
+      setShowKycResultModal(true);
     } else if (enteredPan === "ABCDE1234F") {
       setKycStatus("failed");
+      setShowKycResultModal(true);
     } else {
       setKycStatus(null);
+      setShowKycResultModal(false);
       setError(
         "For this demo, use ABCDE1234S for KYC success or ABCDE1234F for KYC failure."
       );
@@ -344,21 +350,21 @@ export default function SignupPage() {
 
 
 
-    if (!occupation || !annualIncome || !pep) {
-      setError("Please complete occupation, annual income and PEP details.");
+    if (!occupation || !annualIncome) {
+      setError("Please complete occupation, annual income  details.");
       return;
     }
 
     // No actual NSE submission or bank verification is performed.
     setNseRegistered(true);
-    setScreen("dashboard");
+    setShowSubmissionModal(true);
     setError("");
-    setInfo("Demo registration completed. You can now explore the funds.");
+    setInfo("");
   }
 
   function resetDemo() {
     setScreen("signup");
-    setMobile("");
+    setMobile("1234567890");;
     setEmail("");
     setMobileOwner("");
     setEmailOwner("");
@@ -369,12 +375,13 @@ export default function SignupPage() {
     setKycStatus(null);
     setRegistrationStep(3);
     setNseRegistered(false);
+    setShowSubmissionModal(false);
     setError("");
     setInfo("");
     setBuyFundName(null);
     setOccupation("");
     setAnnualIncome("");
-    setPep("");
+    // setPep("");
     setNominees([createNominee(1)]);
     setNextNomineeId(2);
     setUseUserAddress(true);
@@ -467,7 +474,7 @@ export default function SignupPage() {
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <label htmlFor="mobileOwner" className={labelClass}>
                     Mobile number belongs to *
                   </label>
@@ -485,9 +492,9 @@ export default function SignupPage() {
                     <option value="mother">Spouse</option>
 
                   </select>
-                </div>
+                </div> */}
 
-                <div>
+                {/* <div>
                   <label htmlFor="email" className={labelClass}>
                     Email address *
                   </label>
@@ -507,9 +514,9 @@ export default function SignupPage() {
                       setInfo("");
                     }}
                   />
-                </div>
+                </div> */}
 
-                <div>
+                {/* <div>
                   <label htmlFor="emailOwner" className={labelClass}>
                     Email address belongs to *
                   </label>
@@ -527,7 +534,7 @@ export default function SignupPage() {
                     <option value="mother">Spouse</option>
 
                   </select>
-                </div>
+                </div> */}
 
                 {!otpRequested && !otpVerified && (
                   <button
@@ -582,6 +589,19 @@ export default function SignupPage() {
                         OTP verified successfully
                       </p>
                     </div>
+                    <div>
+                      <label htmlFor="password" className={labelClass}>
+                        Password *
+                      </label>
+                      <input
+                        id="password"
+                        type="password"
+                        className={inputClass}
+                        placeholder="Enter your password"
+                        autoComplete="new-password"
+                        required
+                      />
+                    </div>
 
                     <div>
                       <label htmlFor="pan" className={labelClass}>
@@ -617,60 +637,7 @@ export default function SignupPage() {
                   </form>
                 )}
 
-                {kycStatus && (
-                  <div
-                    className={`rounded-xl border p-4 ${kycStatus === "success"
-                      ? "border-emerald-200 bg-emerald-50"
-                      : "border-amber-200 bg-amber-50"
-                      }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {kycStatus === "success" ? (
-                        <CheckCircle2 className="h-6 w-6 text-emerald-600" />
-                      ) : (
-                        <AlertCircle className="h-6 w-6 text-amber-600" />
-                      )}
-                      <h3 className="font-bold text-slate-900">
-                        {kycStatus === "success"
-                          ? "KYC Validated Successfully"
-                          : "KYC Not Completed"}
-                      </h3>
-                    </div>
 
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      {kycStatus === "success"
-                        ? "Your KYC is complete. Continue to NSE registration, or explore funds now."
-                        : "Your KYC is incomplete. Complete your KYC, or explore funds now."}
-                    </p>
-
-                    <div className="mt-4 grid gap-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (kycStatus === "success") {
-                            openRegistration(4);
-                          } else {
-                            setShowKycComplete(false);
-                            openRegistration(3);
-                          }
-                        }}
-                        className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-                      >
-                        {kycStatus === "success"
-                          ? "Complete Your NSE Registration"
-                          : "Complete Your KYC"}
-                        <ArrowRight size={17} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={exploreFunds}
-                        className="min-h-11 rounded-lg border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50"
-                      >
-                        Skip for Now & Explore Funds
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -691,12 +658,12 @@ export default function SignupPage() {
                 <h1 className="font-bold text-blue-950">
                   {registrationStep === 3
                     ? "New KYC Registration"
-                    : "NSE Registration Details"}
+                    : " Registration Details"}
                 </h1>
                 <p className="mt-1 text-xs text-blue-700">
                   {registrationStep === 3
                     ? "Use DigiLocker or enter your details manually"
-                    : "Additional information for NSE account registration"}
+                    : "Additional information for  account registration"}
                 </p>
               </div>
             </div>
@@ -730,8 +697,8 @@ export default function SignupPage() {
                     </h2>
 
                     <p className="mt-2 text-sm leading-6 text-emerald-800">
-                      Your demo KYC submission was successful. You can now register with
-                      NSE or skip NSE registration and explore mutual funds.
+                      Your demo KYC submission was successful. You can now register
+                      or skip  registration and explore mutual funds.
                     </p>
 
                     <div className="mt-5 grid gap-3">
@@ -744,7 +711,7 @@ export default function SignupPage() {
                         }}
                         className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
                       >
-                        Register with NSE <ArrowRight size={17} />
+                        Register  <ArrowRight size={17} />
                       </button>
 
                       <button
@@ -752,7 +719,7 @@ export default function SignupPage() {
                         onClick={exploreFunds}
                         className="min-h-11 rounded-lg border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50"
                       >
-                        Skip NSE & Explore Funds
+                        Skip Register & Explore Funds
                       </button>
                     </div>
                   </div>
@@ -1053,7 +1020,7 @@ export default function SignupPage() {
 
                   <div className="mb-5 rounded-xl border border-blue-100 bg-blue-50 p-4">
                     <h2 className="font-bold text-blue-950">
-                      NSE Registration Details
+                      Registration Details
                     </h2>
                     <p className="mt-1 text-sm leading-5 text-slate-600">
                       Enter occupation, nominee and bank account details to continue.
@@ -1098,7 +1065,7 @@ export default function SignupPage() {
                       </div>
                     </div>
 
-                    <div>
+                    {/* <div>
                       <label className={labelClass}>
                         PEP (Politically Exposed Person) *
                       </label>
@@ -1125,7 +1092,7 @@ export default function SignupPage() {
                           No
                         </label>
                       </div>
-                    </div>
+                    </div> */}
 
 
                     {/* Multiple Nominee Details */}
@@ -1415,7 +1382,7 @@ export default function SignupPage() {
                                     placeholder="Enter guardian full name"
                                   />
                                 </div>
-
+                                {/* 
                                 <div>
                                   <label className={labelClass}>
                                     Guardian Relationship *
@@ -1436,7 +1403,7 @@ export default function SignupPage() {
                                     <option value="Mother">Mother</option>
                                     <option value="Legal Guardian">Legal Guardian</option>
                                   </select>
-                                </div>
+                                </div> */}
 
                                 <div>
                                   <label className={labelClass}>Guardian PAN *</label>
@@ -1548,7 +1515,7 @@ export default function SignupPage() {
                     </div>
 
                     <div className="flex flex-wrap justify-between gap-3 border-t border-slate-100 pt-4">
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => {
                           setRegistrationStep(3);
@@ -1557,13 +1524,13 @@ export default function SignupPage() {
                         className="flex items-center gap-2 text-sm font-semibold text-blue-700 hover:underline"
                       >
                         <ArrowLeft size={16} /> Back to KYC
-                      </button>
+                      </button> */}
 
                       <button
                         type="submit"
                         className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
                       >
-                        Review & Submit <ArrowRight size={17} />
+                        Submit <ArrowRight size={17} />
                       </button>
                     </div>
                   </form>
@@ -1627,7 +1594,7 @@ export default function SignupPage() {
                   ) : (
                     <AlertCircle className="h-5 w-5 text-amber-500" />
                   )}
-                  <h2 className="font-bold text-slate-900">NSE registration</h2>
+                  <h2 className="font-bold text-slate-900">registration</h2>
                 </div>
                 <p className="mt-2 text-sm text-slate-600">
                   {nseRegistered ? "Completed" : "Not completed"}
@@ -1638,7 +1605,7 @@ export default function SignupPage() {
                     onClick={() => openRegistration(kycStatus === "success" ? 4 : 3)}
                     className="mt-3 text-sm font-semibold text-blue-700 hover:underline"
                   >
-                    {kycStatus === "success" ? "Register with NSE" : "Complete KYC first"}{" "}
+                    {kycStatus === "success" ? "Register with" : "Complete KYC first"}{" "}
                     <ArrowRight className="inline h-4 w-4" />
                   </button>
                 )}
@@ -1681,7 +1648,7 @@ export default function SignupPage() {
                     onClick={() => buyFund(fund.name)}
                     className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-semibold text-white hover:bg-blue-700"
                   >
-                    Buy this fund <ArrowRight size={17} />
+                    Buy now <ArrowRight size={17} />
                   </button>
                 </article>
               ))}
@@ -1763,9 +1730,9 @@ export default function SignupPage() {
                 </div>
               ) : !nseRegistered ? (
                 <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                  <h3 className="font-bold text-amber-900">NSE registration is not complete</h3>
+                  <h3 className="font-bold text-amber-900"> registration is not complete</h3>
                   <p className="mt-1 text-sm leading-5 text-amber-800">
-                    Your KYC is complete. Please finish NSE registration to continue.
+                    Your KYC is complete. Please finish  registration to continue.
                   </p>
                 </div>
               ) : (
@@ -1784,7 +1751,7 @@ export default function SignupPage() {
                     onClick={continueFromBuyPopup}
                     className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
                   >
-                    Continue to {kycStatus !== "success" ? "KYC Registration" : "NSE Registration"}
+                    Continue to {kycStatus !== "success" ? "KYC Registration" : " Registration"}
                     <ArrowRight size={17} />
                   </button>
                 )}
@@ -1800,6 +1767,180 @@ export default function SignupPage() {
           </div>
         )}
       </div>
+      {showSubmissionModal && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/50 p-4"
+          onClick={() => setShowSubmissionModal(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="submission-modal-title"
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+              <CheckCircle2 size={30} />
+            </div>
+            <h2
+              id="submission-modal-title"
+              className="text-center text-xl font-bold text-slate-900"
+            >
+              Application Submitted!
+            </h2>
+            <p className="mt-3 text-center text-sm leading-6 text-slate-600">
+              Your application has been submitted successfully. Please check your
+              email for the next steps in the process.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSubmissionModal(false);
+                setScreen("dashboard");
+                setError("");
+                setInfo("Your application has been submitted.  Please check your email for further instructions.");
+              }}
+              className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              Go to Dashboard <ArrowRight size={17} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showKycResultModal && kycStatus && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+          onClick={() => {
+            setShowKycResultModal(false);
+            setIsEditingKycDetails(false);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="kyc-result-title"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowKycResultModal(false);
+                  setIsEditingKycDetails(false);
+                }}
+                aria-label="Close popup"
+                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="text-center">
+              {kycStatus === "success" ? (
+                <CheckCircle2 className="mx-auto mb-3 h-14 w-14 text-emerald-600" />
+              ) : (
+                <AlertCircle className="mx-auto mb-3 h-14 w-14 text-amber-500" />
+              )}
+              <h2 id="kyc-result-title" className="text-xl font-bold text-slate-900">
+                {kycStatus === "success" ? "KYC Validated Successfully" : "KYC Not Completed"}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {kycStatus === "success"
+                  ? "Your existing KYC is complete. Review your details below before continuing."
+                  : "Your KYC is incomplete. Complete your KYC to proceed with registration, or explore funds now."}
+              </p>
+            </div>
+
+            {kycStatus === "success" && (
+              <section className="mt-6 rounded-xl border border-slate-200 p-4">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold text-slate-900">Your KYC Details</h3>
+                    <p className="mt-1 text-xs text-slate-500">Check that your details are correct.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingKycDetails((editing) => !editing)}
+                    className="rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+                  >
+                    {isEditingKycDetails ? "Done Editing" : "Edit Details"}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>PAN Number</label>
+                    <input className={inputClass} value={pan} readOnly />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Full Name</label>
+                    <input className={inputClass} value={kycFullName} readOnly={!isEditingKycDetails} onChange={(e) => setKycFullName(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Date of Birth</label>
+                    <input type="date" className={inputClass} value={kycDob} readOnly={!isEditingKycDetails} onChange={(e) => setKycDob(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Gender</label>
+                    <select className={inputClass} value={kycGender} disabled={!isEditingKycDetails} onChange={(e) => setKycGender(e.target.value)}>
+                      <option>Male</option><option>Female</option><option>Other</option>
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className={labelClass}>Address</label>
+                    <input className={inputClass} value={kycAddress} readOnly={!isEditingKycDetails} onChange={(e) => setKycAddress(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>City</label>
+                    <input className={inputClass} value={kycCity} readOnly={!isEditingKycDetails} onChange={(e) => setKycCity(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>State</label>
+                    <input className={inputClass} value={kycState} readOnly={!isEditingKycDetails} onChange={(e) => setKycState(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>PIN Code</label>
+                    <input className={inputClass} value={kycPincode} readOnly={!isEditingKycDetails} onChange={(e) => setKycPincode(e.target.value)} />
+                  </div>
+                </div>
+                <p className="mt-3 text-xs leading-5 text-slate-500">Demo only: editing these details does not update official KYC records or run the KYC check again.</p>
+              </section>
+            )}
+
+            <div className="mt-6 grid gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowKycResultModal(false);
+                  setIsEditingKycDetails(false);
+                  if (kycStatus === "success") {
+                    openRegistration(4);
+                  } else {
+                    setShowKycComplete(false);
+                    openRegistration(3);
+                  }
+                }}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                {kycStatus === "success" ? "Continue to Registration" : "Complete Your KYC"}
+                <ArrowRight size={17} />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowKycResultModal(false);
+                  setIsEditingKycDetails(false);
+                  exploreFunds();
+                }}
+                className="min-h-11 rounded-lg border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50"
+              >
+                Skip for Now & Explore Funds
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
