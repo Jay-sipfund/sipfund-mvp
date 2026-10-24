@@ -859,9 +859,7 @@ export default function SignupPage() {
                         <h2 className="text-lg font-bold text-slate-900">
                           Complete Your KYC
                         </h2>
-                        <p className="mt-1 text-sm leading-6 text-slate-500">
-                          Choose how you want to provide your personal details.
-                        </p>
+                        
                       </div>
 
                       {/* Entry method switch */}
