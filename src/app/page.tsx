@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -104,7 +103,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [buyFundName, setBuyFundName] = useState<string | null>(null);
-const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
   const [occupation, setOccupation] = useState("Salaried");
   const [annualIncome, setAnnualIncome] = useState("Above ₹25 lakh");
   // const [pep, setPep] = useState("");
@@ -125,7 +124,7 @@ const [showEmailModal, setShowEmailModal] = useState(false);
     "digilocker"
   );
   const [showKycComplete, setShowKycComplete] = useState(false);
-
+  const [showKycSuccessModal, setShowKycSuccessModal] = useState(false);
   const [guardianName, setGuardianName] = useState("John");
   const [guardianRelationship, setGuardianRelationship] = useState("Father");
   const [guardianPan, setGuardianPan] = useState("ABCPD1234E");
@@ -138,6 +137,12 @@ const [showEmailModal, setShowEmailModal] = useState(false);
   const [kycPincode, setKycPincode] = useState("560001");
   const [showNseSteps, setShowNseSteps] = useState(false);
   const [showKycSteps, setShowKycSteps] = useState(false);
+  const [showKycDigiLockerSteps, setShowKycDigiLockerSteps] =
+    useState(false);
+    const [showPersonalDetailsReview, setShowPersonalDetailsReview] =
+  useState(false);
+  const [showKycNseSteps, setShowKycNseSteps] =
+    useState(false);
   const inputClass =
     "h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100";
 
@@ -190,20 +195,23 @@ const [showEmailModal, setShowEmailModal] = useState(false);
   }
 
   function removeNominee(id: number) {
-    const remaining = nominees.filter((nominee) => nominee.id !== id);
-    if (remaining.length === 0) return;
+    setNominees((currentNominees) => {
+      const remaining = currentNominees.filter(
+        (nominee) => nominee.id !== id
+      );
 
-    const basePercentage = Math.floor(100 / remaining.length);
-    const remainder = 100 - basePercentage * remaining.length;
+      if (remaining.length === 0) return currentNominees;
 
-    setNominees(
-      remaining.map((nominee, index) => ({
+      const basePercentage = Math.floor(100 / remaining.length);
+      const remainder = 100 % remaining.length;
+
+      return remaining.map((nominee, index) => ({
         ...nominee,
         percentage: String(
           basePercentage + (index < remainder ? 1 : 0)
         ),
-      }))
-    );
+      }));
+    });
   }
   function requestOtp() {
     setError("");
@@ -233,10 +241,7 @@ const [showEmailModal, setShowEmailModal] = useState(false);
     setError("");
     setInfo("");
 
-    if (otp !== "123456") {
-      setError("Incorrect OTP. For this demo, enter 123456.");
-      return;
-    }
+
 
     setOtpVerified(true);
     setInfo("OTP verification successful.");
@@ -360,9 +365,11 @@ const [showEmailModal, setShowEmailModal] = useState(false);
 
     // No actual NSE submission or bank verification is performed.
     // Demo: ask for the email before showing submission confirmation.
-setShowEmailModal(true);
-setError("");
-setInfo("");
+    setNseRegistered(true);
+    setShowEmailModal(false);
+    setShowSubmissionModal(true);
+    setError("");
+    setInfo("");
   }
 
   function resetDemo() {
@@ -392,7 +399,8 @@ setInfo("");
     setAccountType("");
     setIfsc("");
     setShowEmailModal(false);
-setShowSubmissionModal(false);
+    setShowSubmissionModal(false);
+    setShowPersonalDetailsReview(false);
   }
 
   return (
@@ -521,25 +529,7 @@ setShowSubmissionModal(false);
                   />
                 </div> */}
 
-                {/* <div>
-                  <label htmlFor="emailOwner" className={labelClass}>
-                    Email address belongs to *
-                  </label>
-                  <select
-                    id="emailOwner"
-                    className={inputClass}
-                    value={emailOwner}
-                    disabled={otpVerified}
-                    onChange={(e) => setEmailOwner(e.target.value)}
-                  >
-                    <option value="">Select ownership</option>
-                    <option value="me">Myself</option>
-                    <option value="father">Father</option>
-                    <option value="mother">Mother</option>
-                    <option value="mother">Spouse</option>
-
-                  </select>
-                </div> */}
+              
 
                 {!otpRequested && !otpVerified && (
                   <button
@@ -565,9 +555,9 @@ setShowSubmissionModal(false);
                       inputMode="numeric"
                       maxLength={6}
                       className={inputClass}
-                      placeholder="Enter 6-digit OTP"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                      placeholder="Demo OTP (auto-filled)"
+                      value="123456"
+                      readOnly
                     />
                     <button
                       type="button"
@@ -604,7 +594,17 @@ setShowSubmissionModal(false);
                         className={inputClass}
                         placeholder="Enter your password"
                         autoComplete="new-password"
-                        required
+
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Email *</label>
+                      <input
+                        type="numeric"
+                        className={inputClass}
+
+
+                        placeholder=""
                       />
                     </div>
 
@@ -653,23 +653,27 @@ setShowSubmissionModal(false);
           <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-sm">
             <div className="flex items-center gap-3 border-b border-blue-100 bg-blue-50 px-5 py-4">
               <span
-                className={`flex h-10 w-10 items-center justify-center rounded-full font-bold text-white ${registrationStep === 3 ? "bg-violet-600" : "bg-blue-600"
+                className={`flex h-10 w-10 items-center justify-center rounded-full font-bold text-white ${showPersonalDetailsReview ? "bg-violet-600" : "bg-blue-600"
                   }`}
               >
                 {registrationStep}
               </span>
 
               <div>
-                <h1 className="font-bold text-blue-950">
-                  {registrationStep === 3
-                    ? "New KYC Registration"
-                    : " Registration Details"}
-                </h1>
+               <h1 className="font-bold text-blue-950">
+  {showPersonalDetailsReview
+    ? "Review Personal Details"
+    : registrationStep === 3
+      ? "New KYC Registration"
+      : "Registration Details"}
+</h1>
                 <p className="mt-1 text-xs text-blue-700">
-                  {registrationStep === 3
-                    ? "Use DigiLocker or enter your details manually"
-                    : "Additional information for  account registration"}
-                </p>
+  {showPersonalDetailsReview
+    ? "Check your details and make any necessary changes before continuing."
+    : registrationStep === 3
+      ? "Use DigiLocker or enter your details manually"
+      : "Additional information for account registration"}
+</p>
               </div>
             </div>
 
@@ -692,7 +696,113 @@ setShowSubmissionModal(false);
                 <ArrowLeft size={16} /> Back
               </button>
 
-              {registrationStep === 3 ? (
+              {showPersonalDetailsReview ? (
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    setShowPersonalDetailsReview(false);
+                    setRegistrationStep(4);
+                    setError("");
+                    setInfo("");
+                  }}
+                  className="space-y-5"
+                >
+                  <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+                    <h2 className="font-bold text-violet-950">Personal Details Review</h2>
+                    <p className="mt-1 text-sm leading-5 text-slate-600">
+                      Please review your KYC details before continuing to NSE registration.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>PAN Number</label>
+                      <input className={inputClass} value={pan} readOnly />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Full Name *</label>
+                      <input
+                        className={inputClass}
+                        value={kycFullName}
+                        onChange={(event) => setKycFullName(event.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Date of Birth *</label>
+                      <input
+                        type="date"
+                        className={inputClass}
+                        value={kycDob}
+                        onChange={(event) => setKycDob(event.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Gender *</label>
+                      <select
+                        className={inputClass}
+                        value={kycGender}
+                        onChange={(event) => setKycGender(event.target.value)}
+                        required
+                      >
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                      </select>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className={labelClass}>Address *</label>
+                      <input
+                        className={inputClass}
+                        value={kycAddress}
+                        onChange={(event) => setKycAddress(event.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>City *</label>
+                      <input
+                        className={inputClass}
+                        value={kycCity}
+                        onChange={(event) => setKycCity(event.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>State *</label>
+                      <input
+                        className={inputClass}
+                        value={kycState}
+                        onChange={(event) => setKycState(event.target.value)}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>PIN Code *</label>
+                      <input
+                        className={inputClass}
+                        value={kycPincode}
+                        onChange={(event) => setKycPincode(event.target.value.replace(/\\D/g, "").slice(0, 6))}
+                        inputMode="numeric"
+                        maxLength={6}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs leading-5 text-slate-500">
+                    Demo only: these changes update the displayed details and do not modify official KYC records.
+                  </p>
+
+                  <button
+                    type="submit"
+                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                  >
+                    Confirm Details & Continue to Registration <ArrowRight size={17} />
+                  </button>
+                </form>
+              ) : registrationStep === 3 ? (
                 showKycComplete ? (
                   <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
                     <CheckCircle2 className="mb-3 h-10 w-10 text-emerald-600" />
@@ -730,6 +840,13 @@ setShowSubmissionModal(false);
                       >
                         Steps
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowKycSteps(true)}
+                        className="rounded-lg border border-indigo-600 px-5 py-2 text-indigo-600 hover:bg-indigo-50"
+                      >
+                        Steps
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -753,6 +870,8 @@ setShowSubmissionModal(false);
                           type="button"
                           onClick={() => {
                             setKycEntryMode("digilocker");
+                            setShowKycSuccessModal(true);
+
                             setError("");
                             setInfo("");
                           }}
@@ -779,6 +898,7 @@ setShowSubmissionModal(false);
                           type="button"
                           onClick={() => {
                             setKycEntryMode("manual");
+                            setShowKycSuccessModal(true);
                             setError("");
                             setInfo("");
                           }}
@@ -794,183 +914,32 @@ setShowSubmissionModal(false);
                               }`}
                           />
                           <span className="block text-sm font-bold text-slate-900">
-                            Fill Manually
+                            NSE
                           </span>
-                          <span className="mt-1 block text-xs text-slate-500">
+                          <span className="block text-sm  text-slate-900">
+                            Phone NUmber | Email | Pan Number | AMC Hard codeed
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              window.location.href =
+                                "https://www.nseinvest.com/nsemfdesk/ekycVerifyByUser/5E813ABF583AA73DE0635C28A8C0B6D6";
+                            }}
+                            className="mb-3 flex  items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+                          >
+                            Continue to NSE eKYC Verification
+                            <ArrowRight size={17} />
+                          </button>
+                          {/* <span className="mt-1 block text-xs text-slate-500">
                             Enter details yourself
-                          </span>
+                          </span> */}
                         </button>
                       </div>
 
-                      {/* DigiLocker mode: pre-filled, read-only demo details */}
-                      {/* DigiLocker mode: hide the manual form */}
-                      {kycEntryMode === "digilocker" && (
 
-                        <div className="space-y-6">
-                          {/* Case 1: User has a DigiLocker account */}
-                          <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
-                            <h3 className="text-lg font-semibold text-blue-900">
-                              Case 1: User has a DigiLocker account
-                            </h3>
-
-                            <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-gray-700">
-                              <li>SIPFUND checks the user's existing KYC status through the NSE API.</li>
-                              <li>User selects Fetch Details Using DigiLocker.</li>
-                              <li>User is redirected to DigiLocker and logs in.</li>
-                              <li>User completes OTP verification if required.</li>
-                              <li>User grants consent to share the required documents.</li>
-                              <li>User authorizes the available PAN, Aadhaar, or other eligible documents.</li>
-                              <li>Name, date of birth, gender, and address are automatically filled where available.</li>
-                              <li>User reviews and edits fields where permitted.</li>
-                              <li>User submits the details and proceeds to the applicable KYC or registration process.</li>
-                            </ol>
-                          </div>
-
-                          {/* Case 2: User does not have a DigiLocker account */}
-                          <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
-                            <h3 className="text-lg font-semibold text-amber-900">
-                              Case 2: User does not have a DigiLocker account
-                            </h3>
-
-                            <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-gray-700">
-                              <li>SIPFUND checks the user's existing KYC status through the NSE API.</li>
-                              <li>User selects Fetch Details Using DigiLocker.</li>
-                              <li>User is redirected to DigiLocker account access & found dont have account & create new account.</li>
-                              <li>Enter a valid Indian mobile number and continue. Follow the authentication option displayed</li>
-                              <li>Enter the OTP when requested.</li>
-                              <li>Provide the requested details, such as full name, date of birth, gender and email, where prompted</li>
-                              <li>Set a security PIN</li>
-                              <li>Once registration is complete.</li>
-                              <li>User grants consent to share the requested documents.</li>
-                              <li>SIPFUND retrieves the permitted details </li>
-                              <li>Available onboarding fields are automatically filled.</li>
-                              <li>User reviews the details and edits fields where permitted.</li>
-                              <li>User manually enters missing information.</li>
-                              <li>User submits the details and proceeds to the applicable KYC process.</li>
-                            </ol>
-                          </div>
-
-
-                        </div>
-                      )}
-
-                      {/* Manual mode: same demo details, editable */}
-                      {kycEntryMode === "manual" && (
-                        <form onSubmit={saveKyc} className="space-y-4">
-                          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                            <p className="text-sm font-semibold text-slate-800">
-                              Enter your personal details
-                            </p>
-                            <p className="mt-1 text-xs leading-5 text-slate-500">
-                              Sample data is provided to make demo testing faster. You can edit
-                              the fields before submitting.
-                            </p>
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>PAN Number *</label>
-                            <input
-                              className={inputClass}
-                              value={pan}
-                              onChange={(e) => setPan(e.target.value.toUpperCase())}
-                              required
-                              maxLength={10}
-                            />
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>Full Name *</label>
-                            <input
-                              className={inputClass}
-                              value={kycFullName}
-                              onChange={(e) => setKycFullName(e.target.value)}
-                              required
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div>
-                              <label className={labelClass}>Date of Birth *</label>
-                              <input
-                                type="date"
-                                className={inputClass}
-                                value={kycDob}
-                                onChange={(e) => setKycDob(e.target.value)}
-                                required
-                              />
-                            </div>
-
-                            <div>
-                              <label className={labelClass}>Gender *</label>
-                              <select
-                                className={inputClass}
-                                value={kycGender}
-                                onChange={(e) => setKycGender(e.target.value)}
-                                required
-                              >
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                              </select>
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className={labelClass}>Address *</label>
-                            <input
-                              className={inputClass}
-                              value={kycAddress}
-                              onChange={(e) => setKycAddress(e.target.value)}
-                              required
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                            <div>
-                              <label className={labelClass}>City *</label>
-                              <input
-                                className={inputClass}
-                                value={kycCity}
-                                onChange={(e) => setKycCity(e.target.value)}
-                                required
-                              />
-                            </div>
-
-                            <div>
-                              <label className={labelClass}>State *</label>
-                              <input
-                                className={inputClass}
-                                value={kycState}
-                                onChange={(e) => setKycState(e.target.value)}
-                                required
-                              />
-                            </div>
-
-                            <div>
-                              <label className={labelClass}>PIN Code *</label>
-                              <input
-                                className={inputClass}
-                                inputMode="numeric"
-                                maxLength={6}
-                                value={kycPincode}
-                                onChange={(e) =>
-                                  setKycPincode(e.target.value.replace(/\D/g, "").slice(0, 6))
-                                }
-                                required
-                              />
-                            </div>
-                          </div>
-
-                          <button
-                            type="submit"
-                            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-                          >
-                            Submit KYC Details
-                            <ArrowRight size={17} />
-                          </button>
-                        </form>
-                      )}
+                  
                     </div>
+
 
                   </>
                 )
@@ -1024,34 +993,7 @@ setShowSubmissionModal(false);
                       </div>
                     </div>
 
-                    {/* <div>
-                      <label className={labelClass}>
-                        PEP (Politically Exposed Person) *
-                      </label>
-                      <div className="flex gap-5 text-sm text-slate-700">
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="pep"
-                            value="yes"
-                            checked={pep === "yes"}
-                            onChange={(e) => setPep(e.target.value)}
-                            required
-                          />
-                          Yes
-                        </label>
-                        <label className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="pep"
-                            value="no"
-                            checked={pep === "no"}
-                            onChange={(e) => setPep(e.target.value)}
-                          />
-                          No
-                        </label>
-                      </div>
-                    </div> */}
+                 
 
 
                     {/* Multiple Nominee Details */}
@@ -1341,28 +1283,8 @@ setShowSubmissionModal(false);
                                     placeholder="Enter guardian full name"
                                   />
                                 </div>
-                                {/* 
-                                <div>
-                                  <label className={labelClass}>
-                                    Guardian Relationship *
-                                  </label>
-                                  <select
-                                    className={inputClass}
-                                    value={nominee.guardianRelationship}
-                                    onChange={(e) =>
-                                      updateNominee(
-                                        nominee.id,
-                                        "guardianRelationship",
-                                        e.target.value
-                                      )
-                                    }
-                                    required
-                                  >
-                                    <option value="Father">Father</option>
-                                    <option value="Mother">Mother</option>
-                                    <option value="Legal Guardian">Legal Guardian</option>
-                                  </select>
-                                </div> */}
+                               
+                               
 
                                 <div>
                                   <label className={labelClass}>Guardian PAN *</label>
@@ -1520,56 +1442,7 @@ setShowSubmissionModal(false);
               </div>
             </div>
 
-            <div className="mb-6 grid gap-3 sm:grid-cols-2">
-              {/* <div className="rounded-xl border border-slate-200 bg-white p-4">
-                <div className="flex items-center gap-2">
-                  {kycStatus === "success" ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-amber-500" />
-                  )}
-                  <h2 className="font-bold text-slate-900">KYC status</h2>
-                </div>
-                <p className="mt-2 text-sm text-slate-600">
-                  {kycStatus === "success" ? "Completed" : "Not completed"}
-                </p>
-                {kycStatus !== "success" && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowKycComplete(false);
-                      openRegistration(3);
-                    }} className="mt-3 text-sm font-semibold text-blue-700 hover:underline"
-                  >
-                    Complete KYC <ArrowRight className="inline h-4 w-4" />
-                  </button>
-                )}
-              </div> */}
-
-              {/* <div className="rounded-xl border border-slate-200 bg-white p-4">
-                <div className="flex items-center gap-2">
-                  {nseRegistered ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-amber-500" />
-                  )}
-                  <h2 className="font-bold text-slate-900">registration</h2>
-                </div>
-                <p className="mt-2 text-sm text-slate-600">
-                  {nseRegistered ? "Completed" : "Not completed"}
-                </p>
-                {!nseRegistered && (
-                  <button
-                    type="button"
-                    onClick={() => openRegistration(kycStatus === "success" ? 4 : 3)}
-                    className="mt-3 text-sm font-semibold text-blue-700 hover:underline"
-                  >
-                    {kycStatus === "success" ? "Register with" : "Complete KYC first"}{" "}
-                    <ArrowRight className="inline h-4 w-4" />
-                  </button>
-                )}
-              </div> */}
-            </div>
+           
 
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <div>
@@ -1724,85 +1597,85 @@ setShowSubmissionModal(false);
           </div>
         )}
       </div>
-      
-{showEmailModal && (
-  <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/50 p-4">
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="email-modal-title"
-      className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
-    >
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-        <Mail size={24} />
-      </div>
 
-      <h2
-        id="email-modal-title"
-        className="text-xl font-bold text-slate-900"
-      >
-        Enter Your Email Address
-      </h2>
-
-      <p className="mt-2 text-sm leading-6 text-slate-600">
-        Please provide your email address to receive updates and
-        further instructions about your registration.
-      </p>
-
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-
-          // Demo only: no email is sent and no real NSE submission occurs.
-          setNseRegistered(true);
-          setShowEmailModal(false);
-          setShowSubmissionModal(true);
-          setError("");
-          setInfo("");
-        }}
-        className="mt-5 space-y-4"
-      >
-        <div>
-          <label
-            htmlFor="registration-email"
-            className={labelClass}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/50 p-4">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="email-modal-title"
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
           >
-            Email Address *
-          </label>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+              <Mail size={24} />
+            </div>
 
-          <input
-            id="registration-email"
-            type="email"
-            autoComplete="email"
-            className={inputClass}
-            placeholder="Enter your email address"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
+            <h2
+              id="email-modal-title"
+              className="text-xl font-bold text-slate-900"
+            >
+              Enter Your Email Address
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Please provide your email address to receive updates and
+              further instructions about your registration.
+            </p>
+
+            <form
+              onSubmit={(event) => {
+                event.preventDefault();
+
+                // Demo only: no email is sent and no real NSE submission occurs.
+                setNseRegistered(true);
+                setShowEmailModal(false);
+                setShowSubmissionModal(true);
+                setError("");
+                setInfo("");
+              }}
+              className="mt-5 space-y-4"
+            >
+              <div>
+                <label
+                  htmlFor="registration-email"
+                  className={labelClass}
+                >
+                  Email Address *
+                </label>
+
+                <input
+                  id="registration-email"
+                  type="email"
+                  autoComplete="email"
+                  className={inputClass}
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEmailModal(false)}
+                  className="min-h-11 flex-1 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  className="min-h-11 flex-1 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                  Submit Email
+                  <ArrowRight className="ml-1 inline" size={16} />
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setShowEmailModal(false)}
-            className="min-h-11 flex-1 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            className="min-h-11 flex-1 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-          >
-            Submit Email
-            <ArrowRight className="ml-1 inline" size={16} />
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
+      )}
 
       {showSubmissionModal && (
         <div
@@ -1839,7 +1712,7 @@ setShowSubmissionModal(false);
               }}
               className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
             >
-              Go to Dashboard <ArrowRight size={17} />
+              Dashboard <ArrowRight size={17} />
             </button>
             <button
               type="button"
@@ -2053,51 +1926,262 @@ setShowSubmissionModal(false);
         </div>
       )}
 
-{showKycSteps && (
-  <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
-    <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white p-6">
-      <div className="sticky top-0 mb-5 flex items-center justify-between bg-white py-2">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">
-            KYC Registration — Step-by-Step Guide
-          </h2>
-          <p className="text-sm text-gray-500">
-            Follow the 11 steps to understand the registration process.
-          </p>
-        </div>
+      {showKycSteps && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
+          <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white p-6">
+            <div className="sticky top-0 mb-5 flex items-center justify-between bg-white py-2">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  KYC Registration — Step-by-Step Guide
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Follow the 11 steps to understand the registration process.
+                </p>
+              </div>
 
-        <button
-          type="button"
-          onClick={() => setShowKycSteps(false)}
-          className="rounded-lg border px-4 py-2 hover:bg-gray-100"
-        >
-          Close
-        </button>
-      </div>
+              <button
+                type="button"
+                onClick={() => setShowKycSteps(false)}
+                className="rounded-lg border px-4 py-2 hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
 
-      {Array.from({ length: 11 }, (_, index) => {
-        const stepNumber = index + 1;
+            {Array.from({ length: 11 }, (_, index) => {
+              const stepNumber = index + 1;
 
-        return (
-          <div
-            key={stepNumber}
-            className="mb-6 rounded-xl border border-gray-200 p-4"
-          >
-            <h3 className="mb-3 font-semibold text-gray-900">
-              Step {stepNumber}
-            </h3>
+              return (
+                <div
+                  key={stepNumber}
+                  className="mb-6 rounded-xl border border-gray-200 p-4"
+                >
+                  <h3 className="mb-3 font-semibold text-gray-900">
+                    Step {stepNumber}
+                  </h3>
 
-            <img
-              src={`/kyc-steps/step-${stepNumber}.png`}
-              alt={`KYC registration step ${stepNumber}`}
-              className="h-auto w-full rounded-lg"
-            />
+                  <img
+                    src={`/kyc-steps/step-${stepNumber}.png`}
+                    alt={`KYC registration step ${stepNumber}`}
+                    className="h-auto w-full rounded-lg"
+                  />
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
-    </div>
-  </div>
-)}
+        </div>
+      )}
+
+      {showKycDigiLockerSteps && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
+          <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white p-6">
+            <div className="sticky top-0 mb-5 flex items-center justify-between gap-3 bg-white py-2">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  KYC via DigiLocker — Step-by-Step Guide
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Follow the DigiLocker KYC screenshots in sequence.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowKycDigiLockerSteps(false)}
+                className="rounded-lg border px-4 py-2 hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+
+            {Array.from({ length: 20 }, (_, index) => {
+              const stepNumber = index + 1;
+              return (
+                <div key={stepNumber} className="mb-6 rounded-xl border border-gray-200 p-4">
+                  <h3 className="mb-3 font-semibold text-gray-900">Step {stepNumber} of 20</h3>
+                  <img
+                    src={`/kyc-digilocker-registration/step-${stepNumber}.png`}
+                    alt={`DigiLocker KYC step ${stepNumber}`}
+                    className="mx-auto h-auto w-full rounded-lg object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {showKycNseSteps && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
+          <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white p-6">
+            <div className="sticky top-0 mb-5 flex items-center justify-between gap-3 bg-white py-2">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  KYC via NSE API — Step-by-Step Guide
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Follow the NSE API KYC screenshots in sequence.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowKycNseSteps(false)}
+                className="rounded-lg border px-4 py-2 hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+
+            {Array.from({ length: 20 }, (_, index) => {
+              const stepNumber = index + 1;
+              return (
+                <div key={stepNumber} className="mb-6 rounded-xl border border-gray-200 p-4">
+                  <h3 className="mb-3 font-semibold text-gray-900">Step {stepNumber} of 20</h3>
+                  <img
+                    src={`/kyc-nse-registration/step-${stepNumber}.jpeg`}
+                    alt={`NSE API KYC step ${stepNumber}`}
+                    className="mx-auto h-auto w-full rounded-lg object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {showKycSuccessModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4"
+          onClick={() => setShowKycSuccessModal(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="kyc-success-modal-title"
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-7"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {/* Success header */}
+            <div className="text-center">
+              <CheckCircle2 className="mx-auto mb-3 h-14 w-14 text-emerald-600" />
+
+              <h2
+                id="kyc-success-modal-title"
+                className="text-2xl font-bold text-emerald-900"
+              >
+                KYC Demo Completed Successfully!
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Your selected KYC demo flow is complete. Review the
+                information below and continue with NSE registration.
+              </p>
+            </div>
+
+            {/* DigiLocker content */}
+            {kycEntryMode === "digilocker" ? (
+              <div className="mt-6 space-y-4">
+                <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                  <h3 className="font-bold text-blue-950">
+                    Case 1: User has a DigiLocker account 
+                  </h3>
+
+                  <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
+                    <li>SIPFUND checks the existing KYC status through the NSE API.</li>
+                    <li>User selects DigiLocker to fetch details.</li>
+                    <li>User logs in and completes OTP verification if required.</li>
+                    <li>User grants consent to share eligible documents.</li>
+                    <li>Available details are retrieved and prefilled where supported.</li>
+                    <li>User reviews the details and continues with registration.</li>
+                  </ol>
+                </div>
+
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <h3 className="font-bold text-amber-950">
+                    Case 2: User does not have a DigiLocker account
+                  </h3>
+
+                  <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
+                    <li>User selects DigiLocker to fetch details.</li>
+                    <li>User chooses to create a DigiLocker account.</li>
+                    <li>User enters the required details and completes the displayed authentication process.</li>
+                    <li>User grants consent to share eligible documents.</li>
+                    <li>Available details are retrieved and prefilled where supported.</li>
+                    <li>User reviews the details and continues with registration.</li>
+                  </ol>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowKycSuccessModal(false);
+                    setShowKycDigiLockerSteps(true);
+                  }}
+                  className="w-full rounded-lg border border-indigo-200 px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
+                >
+                  View DigiLocker KYC Steps
+                </button>
+              </div>
+            ) : (
+              <div className="mt-6 rounded-xl border border-indigo-200 bg-indigo-50 p-5">
+                <h3 className="font-bold text-indigo-950">
+                  KYC via NSE API
+                </h3>
+
+                <p className="mt-2 text-sm leading-6 text-slate-700">
+                  This demo represents the NSE KYC flow. The actual KYC
+                  status must be confirmed by the relevant verification service.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowKycSuccessModal(false);
+                    setShowKycNseSteps(true);
+                  }}
+                  className="mt-4 w-full rounded-lg border border-indigo-200 bg-white px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
+                >
+                  View NSE API KYC Steps
+                </button>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+              onClick={() => {
+  setShowKycSuccessModal(false);
+  setError("");
+  setInfo("");
+  setScreen("registration");
+  setRegistrationStep(4);
+  setShowPersonalDetailsReview(true);
+}}
+                className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                Register with NSE
+                <ArrowRight size={17} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowKycSuccessModal(false)}
+                className="min-h-12 rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Close
+              </button>
+            </div>
+
+            <p className="mt-4 text-center text-xs leading-5 text-slate-500">
+              Presentation demo only. Opening this modal does not perform
+              actual KYC verification.
+            </p>
+          </div>
+        </div>
+      )}
+
 
     </main>
   );
