@@ -139,8 +139,8 @@ export default function SignupPage() {
   const [showKycSteps, setShowKycSteps] = useState(false);
   const [showKycDigiLockerSteps, setShowKycDigiLockerSteps] =
     useState(false);
-    const [showPersonalDetailsReview, setShowPersonalDetailsReview] =
-  useState(false);
+  const [showPersonalDetailsReview, setShowPersonalDetailsReview] =
+    useState(false);
   const [showKycNseSteps, setShowKycNseSteps] =
     useState(false);
   const inputClass =
@@ -447,7 +447,7 @@ export default function SignupPage() {
                   {otpVerified ? "PAN & KYC Validation" : "Signup – Basic Details"}
                 </h1>
                 <p className="mt-1 text-xs text-blue-700">
-                  SIPFUND · Investor onboarding
+                  SIPFUND User Onboarding
                 </p>
               </div>
             </div>
@@ -529,7 +529,7 @@ export default function SignupPage() {
                   />
                 </div> */}
 
-              
+
 
                 {!otpRequested && !otpVerified && (
                   <button
@@ -660,20 +660,20 @@ export default function SignupPage() {
               </span>
 
               <div>
-               <h1 className="font-bold text-blue-950">
-  {showPersonalDetailsReview
-    ? "Review Personal Details"
-    : registrationStep === 3
-      ? "New KYC Registration"
-      : "Registration Details"}
-</h1>
+                <h1 className="font-bold text-blue-950">
+                  {showPersonalDetailsReview
+                    ? "Review Personal Details"
+                    : registrationStep === 3
+                      ? "New KYC Registration"
+                      : "Registration Details"}
+                </h1>
                 <p className="mt-1 text-xs text-blue-700">
-  {showPersonalDetailsReview
-    ? "Check your details and make any necessary changes before continuing."
-    : registrationStep === 3
-      ? "Use DigiLocker or enter your details manually"
-      : "Additional information for account registration"}
-</p>
+                  {showPersonalDetailsReview
+                    ? "Check your details and make any necessary changes before continuing."
+                    : registrationStep === 3
+                      ? "Use DigiLocker or enter your details manually"
+                      : "Additional information for account registration"}
+                </p>
               </div>
             </div>
 
@@ -859,7 +859,7 @@ export default function SignupPage() {
                         <h2 className="text-lg font-bold text-slate-900">
                           Complete Your KYC
                         </h2>
-                        
+
                       </div>
 
                       {/* Entry method switch */}
@@ -935,7 +935,7 @@ export default function SignupPage() {
                       </div>
 
 
-                  
+
                     </div>
 
 
@@ -991,7 +991,7 @@ export default function SignupPage() {
                       </div>
                     </div>
 
-                 
+
 
 
                     {/* Multiple Nominee Details */}
@@ -1281,8 +1281,8 @@ export default function SignupPage() {
                                     placeholder="Enter guardian full name"
                                   />
                                 </div>
-                               
-                               
+
+
 
                                 <div>
                                   <label className={labelClass}>Guardian PAN *</label>
@@ -1440,7 +1440,7 @@ export default function SignupPage() {
               </div>
             </div>
 
-           
+
 
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <div>
@@ -1976,11 +1976,9 @@ export default function SignupPage() {
             <div className="sticky top-0 mb-5 flex items-center justify-between gap-3 bg-white py-2">
               <div>
                 <h2 className="text-xl font-bold text-gray-900">
-                  KYC via DigiLocker — Step-by-Step Guide
+                  DigiLocker Signup Steps
                 </h2>
-                <p className="text-sm text-gray-500">
-                  Follow the DigiLocker KYC screenshots in sequence.
-                </p>
+
               </div>
               <button
                 type="button"
@@ -2068,13 +2066,11 @@ export default function SignupPage() {
                 id="kyc-success-modal-title"
                 className="text-2xl font-bold text-emerald-900"
               >
-                KYC Demo Completed Successfully!
+                {kycEntryMode === "digilocker"
+                  ? "The user has been redirected to DigiLocker Frame"
+                  : "The user has been redirected to NSE Portal"}
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Your selected KYC demo flow is complete. Review the
-                information below and continue with NSE registration.
-              </p>
             </div>
 
             {/* DigiLocker content */}
@@ -2082,7 +2078,7 @@ export default function SignupPage() {
               <div className="mt-6 space-y-4">
                 <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
                   <h3 className="font-bold text-blue-950">
-                    Case 1: User has a DigiLocker account 
+                    Case 1: User has a DigiLocker account
                   </h3>
 
                   <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
@@ -2149,14 +2145,14 @@ export default function SignupPage() {
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
-              onClick={() => {
-  setShowKycSuccessModal(false);
-  setError("");
-  setInfo("");
-  setScreen("registration");
-  setRegistrationStep(4);
-  setShowPersonalDetailsReview(true);
-}}
+                onClick={() => {
+                  setShowKycSuccessModal(false);
+                  setError("");
+                  setInfo("");
+                  setScreen("registration");
+                  setRegistrationStep(4);
+                  setShowPersonalDetailsReview(true);
+                }}
                 className="flex min-h-12 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
               >
                 Register with NSE
