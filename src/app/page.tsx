@@ -1388,9 +1388,8 @@ export default function SignupPage() {
                           <input className={inputClass} maxLength={11} value={ifsc} onChange={(e) => setIfsc(e.target.value.toUpperCase())} required placeholder="Enter any demo IFSC value" />
                         </div>
                       </div>
-                      <p className="mt-2 text-xs text-slate-500">
-                        Demo only: the IFSC format is not validated and no bank verification is performed.
-                      </p>
+                      <p className="mt-2 text-sm text-black-300">
+                        Note: After submission, backend create the UCC  and share it along with the filled-in details.</p>
                     </div>
 
                     <div className="flex flex-wrap justify-between gap-3 border-t border-slate-100 pt-4">
@@ -2067,8 +2066,8 @@ export default function SignupPage() {
                 className="text-2xl font-bold text-emerald-900"
               >
                 {kycEntryMode === "digilocker"
-                  ? "The user has been redirected to DigiLocker Frame"
-                  : "The user has been redirected to NSE Portal"}
+                  ? "The user will be redirected to DigiLocker Frame"
+                  : "The user will be redirected to NSE Portal"}
               </h2>
 
             </div>
@@ -2082,7 +2081,6 @@ export default function SignupPage() {
                   </h3>
 
                   <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
-                    <li>SIPFUND checks the existing KYC status through the NSE API.</li>
                     <li>User selects DigiLocker to fetch details.</li>
                     <li>User logs in and completes OTP verification if required.</li>
                     <li>User grants consent to share eligible documents.</li>
@@ -2097,7 +2095,6 @@ export default function SignupPage() {
                   </h3>
 
                   <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-6 text-slate-700">
-                    <li>User selects DigiLocker to fetch details.</li>
                     <li>User chooses to create a DigiLocker account.</li>
                     <li>User enters the required details and completes the displayed authentication process.</li>
                     <li>User grants consent to share eligible documents.</li>
